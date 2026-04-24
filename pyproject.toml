@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smarttools"
+version = "0.1.0"
+description = "Japanese stock analyst MCP tool + Claude-driven desktop client"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.2.0",
+    "anthropic>=0.40.0",
+    "pydantic>=2.6",
+    "python-dotenv>=1.0",
+    "yfinance>=0.2.40",
+    "httpx>=0.27",
+    "uvicorn[standard]>=0.30",
+    "starlette>=0.37",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+smarttools-mcp = "mcp_server.server:main"
+smarttools-gui = "gui_client.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
