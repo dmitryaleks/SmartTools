@@ -14,6 +14,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from .analyst import analyze
+from .mcp_logger import log_interaction
 from .schema import StockAnalysisResult
 
 
@@ -55,10 +56,25 @@ def analyze_japanese_stock(stock_code: str, days: int) -> dict:
     Returns:
         StockAnalysisResult JSON: summary + {base,bull,bear}{price,probability,rationale}.
     """
-    if days <= 0 or days > 365:
-        raise ValueError("days must be in 1..365")
-    result: StockAnalysisResult = analyze(stock_code, days)
-    return result.model_dump(mode="json")
+    arguments = {"stock_code": stock_code, "days": days}
+    try:
+        if days <= 0 or days > 365:
+            raise ValueError("days must be in 1..365")
+        result: StockAnalysisResult = analyze(stock_code, days)
+        response = result.model_dump(mode="json")
+    except Exception as exc:
+        log_interaction(
+            tool_name="analyze_japanese_stock",
+            arguments=arguments,
+            error=f"{type(exc).__name__}: {exc}",
+        )
+        raise
+    log_interaction(
+        tool_name="analyze_japanese_stock",
+        arguments=arguments,
+        response=response,
+    )
+    return response
 
 
 class BearerAuthMiddleware(BaseHTTPMiddleware):
